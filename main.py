@@ -1,8 +1,13 @@
 import argparse
 from sys import path
 from time import sleep
-
+from datetime import datetime, timedelta
+from PIL import ImageFont, ImageDraw, Image
 from IT8951 import constants
+import requests
+import json
+
+from models.climacell.ClimacellResponse import climacell_response_decoder
 
 path += ['../IT8951/IT8951']
 
@@ -34,36 +39,31 @@ if __name__ == '__main__':
         display = VirtualEPDDisplay(dims=(800, 600), rotate=args.rotate)
         print("initializing virtual display")
 
-    import requests
-
     # TEST
+    time_end = (datetime.utcnow() + timedelta(days=2)).replace(microsecond=0).isoformat()
     url = "https://api.climacell.co/v3/weather/forecast/hourly"
+    # BP coordinates
     querystring = {"lat": "47.524862", "lon": "19.082513", "unit_system": "si", "start_time": "now",
-                   "end_time": "2020-10-11T22:44:00Z", "fields": "precipitation_probability,temp,precipitation_type",
+                   "end_time": time_end, "fields": "precipitation_probability,temp,precipitation_type,weather_code",
                    "apikey": "u0q4InQgQv6dd5scyrcwy9oP0w10G1yo"}
-    response = requests.request("GET", url, params=querystring)
-    print(response.text)
+    #response = requests.request("GET", url, params=querystring)
+    #response.text
+    response = """
+    [{"lat":47.524862,"lon":19.082513,
+     "temp":{"value":7.27,"units":"C"},
+     "precipitation_type":{"value":"rain"},
+     "precipitation_probability":{"value":65,"units":"%"},
+     "weather_code":{"value":"drizzle"},
+     "observation_time":{"value":"2020-10-13T17:00:00.000Z"}}]
+    """
+    decoded = json.loads(response, object_hook=climacell_response_decoder)
 
-    # set frame buffer to gradient
-    for i in range(16):
-        color = i * 0x10
-        box = (
-            i * display.width // 16,  # xmin
-            0,  # ymin
-            (i + 1) * display.width // 16,  # xmax
-            display.height  # ymax
-        )
-        display.frame_buf.paste(color, box=box)
+    # draw some text
+    fnt = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 185)
+    image_draw = ImageDraw.Draw(display.frame_buf)
+    image_draw.text((10, -50), text="23:45:38", font=fnt)
 
     # update display
     display.draw_full(constants.DisplayModes.GC16)
 
-    # then add some black and white bars on top of it, to test updating with DU on top of GC16
-    box = (0, display.height // 5, display.width, 2 * display.height // 5)
-    display.frame_buf.paste(0x00, box=box)
-
-    box = (0, 3 * display.height // 5, display.width, 4 * display.height // 5)
-    display.frame_buf.paste(0xF0, box=box)
-
-    display.draw_partial(constants.DisplayModes.DU)
-    sleep(1)
+    sleep(2)

@@ -1,2 +1,3 @@
 RPi.GPIO
 pillow
+requests

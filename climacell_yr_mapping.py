@@ -1,0 +1,26 @@
+
+climacell_yr_map = {
+    "freezing_rain_heavy": "48",
+    "freezing_rain": "12",
+    "freezing_rain_light": "47",
+    "freezing_drizzle": "47",
+    "ice_pellets_heavy": "48",
+    "ice_pellets": "12",
+    "ice_pellets_light": "47",
+    "snow_heavy": "50",
+    "snow": "13",
+    "snow_light": "49",
+    "flurries": "49",
+    "tstorm": "11",
+    "rain_heavy": "10",
+    "rain": "09",
+    "rain_light": "46",
+    "drizzle": "46",
+    "fog_light": "15",
+    "fog": "15",
+    "cloudy": "04",
+    "mostly_cloudy": "03",
+    "partly_cloudy": "02",
+    "mostly_clear": "01",
+    "clear": "01"
+}
