@@ -9,7 +9,7 @@ class ClimacellResponse(object):
                  weather_code, observation_time):
         self.lat: float = lat
         self.lon: float = lon
-        self.temp: float = temp
+        self.temp: int = int(temp)
         self.precipitation_type: str = precipitation_type
         self.precipitation_probability: int = precipitation_probability
         self.weather_code: str = weather_code
