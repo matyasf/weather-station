@@ -1,13 +1,17 @@
 import argparse
 from sys import path
 from time import sleep
-from datetime import datetime, timedelta
-from PIL import ImageFont, ImageDraw, Image
-from IT8951 import constants
+from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 import requests
+from PIL import ImageFont, ImageDraw
+from backports.zoneinfo import ZoneInfo
+from models import AppConstants
+from IT8951 import constants
 import json
-
-from models.climacell.ClimacellResponse import climacell_response_decoder
+from typing import List
+from models.climacell.ClimacellResponse import climacell_response_decoder, ClimacellResponse
+from models.AppConstants import AppConstants
 
 path += ['../IT8951/IT8951']
 
@@ -50,23 +54,37 @@ def refresh_time_text(display):
 
 
 def fetch_weather():
-    time_end = (datetime.utcnow() + timedelta(days=2)).replace(microsecond=0).isoformat()
-    url = "https://api.climacell.co/v3/weather/forecast/hourly"
-    # BP coordinates
-    querystring = {"lat": "47.524862", "lon": "19.082513", "unit_system": "si", "start_time": "now",
+    # +put here error handling
+    time_end = (datetime.utcnow() + timedelta(hours=5)).replace(microsecond=0).isoformat()
+    url = "https://api.climacell.co/v3/weather/forecast/hourly"# returns hourly results, time in GMT
+    querystring = {"lat": AppConstants.forecast_lat, "lon": AppConstants.forecast_lon, "unit_system": "si", "start_time": "now",
                    "end_time": time_end, "fields": "precipitation_probability,temp,precipitation_type,weather_code",
                    "apikey": "u0q4InQgQv6dd5scyrcwy9oP0w10G1yo"}
-    # response = requests.request("GET", url, params=querystring)
-    # response.text
-    response = """
-        [{"lat":47.524862,"lon":19.082513,
-         "temp":{"value":7.27,"units":"C"},
-         "precipitation_type":{"value":"rain"},
-         "precipitation_probability":{"value":65,"units":"%"},
-         "weather_code":{"value":"drizzle"},
-         "observation_time":{"value":"2020-10-13T17:00:00.000Z"}}]
-        """
-    decoded = json.loads(response, object_hook=climacell_response_decoder)
+    #response = requests.request("GET", url, params=querystring)
+    response = SimpleNamespace()
+    # from 16:00UTC = 18:00 BP time
+    response.text = '[{"lat":47.524862,"lon":19.082513,"temp":{"value":8.68,"units":"C"},' \
+                    '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":75,"units":"%"},' \
+                    '"weather_code":{"value":"rain_light"},"observation_time":{"value":"2020-10-12T16:00:00.000Z"}},' \
+                    '{"lat":47.524862,"lon":19.082513,"temp":{"value":8.67,"units":"C"},' \
+                    '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":80,"units":"%"},' \
+                    '"weather_code":{"value":"rain_light"},"observation_time":{"value":"2020-10-12T17:00:00.000Z"}},' \
+                    '{"lat":47.524862,"lon":19.082513,"temp":{"value":8.53,"units":"C"},' \
+                    '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":60,"units":"%"},' \
+                    '"weather_code":{"value":"drizzle"},"observation_time":{"value":"2020-10-12T18:00:00.000Z"}},' \
+                    '{"lat":47.524862,"lon":19.082513,"temp":{"value":8.44,"units":"C"},' \
+                    '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":50,"units":"%"},' \
+                    '"weather_code":{"value":"drizzle"},"observation_time":{"value":"2020-10-12T19:00:00.000Z"}},' \
+                    '{"lat":47.524862,"lon":19.082513,"temp":{"value":8.42,"units":"C"},' \
+                    '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":50,"units":"%"},' \
+                    '"weather_code":{"value":"drizzle"},"observation_time":{"value":"2020-10-12T20:00:00.000Z"}},' \
+                    '{"lat":47.524862,"lon":19.082513,"temp":{"value":8.42,"units":"C"},' \
+                    '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":50,"units":"%"},' \
+                    '"weather_code":{"value":"drizzle"},"observation_time":{"value":"2020-10-12T21:00:00.000Z"}}]'
+    decoded: List[ClimacellResponse] = json.loads(response.text, object_hook=climacell_response_decoder)
+    future_forecasts = [future_forecast for future_forecast in decoded if future_forecast.observation_time > datetime.now(ZoneInfo(AppConstants.local_time_zone))]
+    print("decoded")
+    # + code to display it
 
 
 if __name__ == '__main__':
@@ -80,6 +98,7 @@ if __name__ == '__main__':
         refresh_time_text(display)
         if (last_weather_refresh_time + timedelta(minutes=60)) < start_time:
             last_weather_refresh_time = start_time
+            fetch_weather()
             print("refresh weather")
         # + code to get data from BME680
         elapsed_time = datetime.now() - start_time

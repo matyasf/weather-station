@@ -1,3 +1,4 @@
 RPi.GPIO
 pillow
 requests
+backports.zoneinfo
