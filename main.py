@@ -9,7 +9,7 @@ from PIL import ImageFont, ImageDraw
 from IT8951.display import VirtualEPDDisplay, AutoEPDDisplay, AutoDisplay
 from controllers.ClimacellController import ClimacellController
 from IT8951 import constants
-
+from models.AppConstants import AppConstants
 
 path += ['../IT8951/IT8951']
 
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     while True:
         start_time = datetime.now()
         refresh_time_text(display)
-        if (last_weather_refresh_time + timedelta(minutes=60)) < start_time:
+        if (last_weather_refresh_time + timedelta(seconds=AppConstants.climacell_api_refresh_secs)) < start_time:
             last_weather_refresh_time = start_time
             climacell.fetch_weather()
             print("refresh weather")
