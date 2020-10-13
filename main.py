@@ -1,17 +1,12 @@
 import argparse
-from sys import path
 from time import sleep
 from datetime import datetime, timedelta
-from typing import Union
 
 from PIL import ImageFont, ImageDraw
-
 from IT8951.display import VirtualEPDDisplay, AutoEPDDisplay, AutoDisplay
 from controllers.ClimacellController import ClimacellController
 from IT8951 import constants
 from models.AppConstants import AppConstants
-
-path += ['../IT8951/IT8951']
 
 
 def parse_args():
