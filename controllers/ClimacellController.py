@@ -3,6 +3,7 @@ from typing import List
 from PIL import ImageFont, ImageDraw
 
 from IT8951.display import AutoDisplay
+from models.climacell import climacell_yr_mapping
 from models.climacell.ClimacellResponse import climacell_response_decoder, ClimacellResponse
 from models.AppConstants import AppConstants
 from backports.zoneinfo import ZoneInfo
@@ -60,13 +61,35 @@ class ClimacellController:
     def display_data_if_any(self, display: AutoDisplay):
         image_draw = ImageDraw.Draw(display.frame_buf)
 
+        text_y_start = 450
         for num, forecast in enumerate(self.future_forecasts):
             # image_draw.rectangle((5, 5, 780, 145), fill=255)
-            image_draw.text((10 + num * 150, 400),
+
+            # draw icon
+            weather_icon = climacell_yr_mapping.climacell_yr_map.get(forecast.weather_code)
+            # these have day/night variations
+            if weather_icon == "03" or weather_icon == "02" or weather_icon == "01":
+                if forecast.observation_time.hour > 7 and forecast.observation_time.hour < 20:
+                    weather_icon = weather_icon + "d"
+                else:
+                    weather_icon = weather_icon + "n"
+######################################
+            img = Image.open(img_path)
+
+            # TODO: this should be built-in
+            dims = (display.width, display.height)
+
+            img.thumbnail(dims)
+            paste_coords = [dims[i] - img.size[i] for i in (0, 1)]  # align image with bottom of display
+            display.frame_buf.paste(img, paste_coords)
+
+            image_draw.bitmap((10 + num * 140, 360), ???)
+            #########################################
+            image_draw.text((10 + num * 150, text_y_start),
                             text=self.format_date(forecast.observation_time), font=self.font)
-            image_draw.text((10 + num * 150, 450),
+            image_draw.text((10 + num * 150, text_y_start + 50),
                             text=str(forecast.temp) + "°C", font=self.font)
-            image_draw.text((10 + num * 150, 500),
+            image_draw.text((10 + num * 150, text_y_start + 100),
                             text=str(forecast.precipitation_probability) + "%", font=self.font)
 
     def format_date(self, date: datetime) -> str:
