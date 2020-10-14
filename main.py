@@ -2,7 +2,7 @@ import argparse
 from time import sleep
 from datetime import datetime, timedelta
 
-from PIL import ImageFont, ImageDraw
+from PIL import ImageFont, ImageDraw, Image
 from IT8951.display import VirtualEPDDisplay, AutoEPDDisplay, AutoDisplay
 from controllers.ClimacellController import ClimacellController
 from IT8951 import constants
@@ -21,7 +21,7 @@ def parse_args():
 
 
 def init_display():
-    # display is a 8 bit pixel B&W image
+    # display.frame_buf is a 8 bit pixel B&W image
     if not args.virtual:
         print('Initializing EPD...')
         # here, spi_hz controls the rate of data transfer to the device, so a higher
@@ -43,6 +43,15 @@ def refresh_time_text(display: AutoDisplay):
     image_draw.text((5, -50), text=now.strftime("%H:%M:%S"), font=time_font)
 
 
+def draw_test_penguin():
+    display.clear()
+    display.frame_buf.paste(0xFF, box=(0, 0, display.width, display.height))
+    icon_bmp = Image.open("assets/test_penguin.png")
+    icon_bmp.thumbnail((display.width - 10, display.height - 10))
+    display.frame_buf.paste(icon_bmp)
+    display.draw_full(constants.DisplayModes.GC16)
+    sleep(8)
+
 if __name__ == '__main__':
     args = parse_args()
     climacell = ClimacellController()
@@ -60,6 +69,7 @@ if __name__ == '__main__':
         new_weather_data = climacell.display_data_if_any(display)
         # + code to get data from BME680
         display.draw_partial(constants.DisplayModes.GC16)
+
         elapsed_time = datetime.now() - start_time
         if elapsed_time.total_seconds() < 1:
             sleep_duration = 1 - elapsed_time.total_seconds() - 0.01

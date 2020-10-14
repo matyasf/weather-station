@@ -42,16 +42,17 @@ class ClimacellController:
         print("decoded")
 
     def display_data_if_any(self, display: AutoDisplay):
-        if self.future_forecasts == None:
+        if self.future_forecasts is None:
             return
         image_draw = ImageDraw.Draw(display.frame_buf)
         text_y_start = 450
         column_width = 165
         icon_y = 350
-        image_draw.rectangle((5, icon_y, 780, icon_y + 245), fill=255)
+        display.frame_buf.paste(0xFF, box=(5, icon_y, 780, icon_y + 245))
+        #image_draw.rectangle((5, icon_y, 780, icon_y + 245), fill=255)
         for num, forecast in enumerate(self.future_forecasts):
             # draw icon
-            weather_icon = climacell_yr_mapping.climacell_yr_map.get(forecast.weather_code)
+            weather_icon: str = climacell_yr_mapping.climacell_yr_map.get(forecast.weather_code)
             # these have day/night variations
             if weather_icon == "03" or weather_icon == "02" or weather_icon == "01":
                 if forecast.observation_time.hour > 7 and forecast.observation_time.hour < 20:
@@ -59,7 +60,8 @@ class ClimacellController:
                 else:
                     weather_icon = weather_icon + "n"
             icon_bmp = Image.open("assets/yr_icons_100/" + weather_icon + ".png")
-            image_draw.bitmap((10 + num * column_width, icon_y), icon_bmp)
+            display.frame_buf.paste(icon_bmp, (10 + num * column_width, icon_y))
+            #image_draw.bitmap((10 + num * column_width, icon_y), icon_bmp)
 
             image_draw.text((10 + num * column_width, text_y_start),
                             text=forecast.observation_time.strftime("%H:%M"), font=self.font)
