@@ -1,4 +1,5 @@
 RPi.GPIO
-pillow
+pillow~=7.2.0
 requests
 backports.zoneinfo
+IT8951~=0.1.0
