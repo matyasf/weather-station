@@ -6,6 +6,7 @@ from PIL import ImageFont, ImageDraw, Image
 from IT8951.display import VirtualEPDDisplay, AutoEPDDisplay, AutoDisplay
 from controllers.ClimacellController import ClimacellController
 from IT8951 import constants
+
 from models.AppConstants import AppConstants
 
 
@@ -44,11 +45,20 @@ def refresh_time_text(display: AutoDisplay):
 
 
 def draw_test_penguin():
-    display.clear()
+    #icon_bmp2 = Image.open("assets/test_penguin.png")
+    #icon_bmp2 = Image.open("assets/yr_icons_100/01m.png")
+    #icon_bmp2 = icon_bmp2.convert("L")
+    im2 = Image.new('L', (650, 500), 0xFF) # frame_buf
+    image_draw2 = ImageDraw.Draw(im2)
+    #image_draw2.bitmap((0, 0), icon_bmp2)
+    font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 100)
+    image_draw2.text((10, 10), text="12:32:54", font=font)
+    im2.save('test.png')
+
     display.frame_buf.paste(0xFF, box=(0, 0, display.width, display.height))
     icon_bmp = Image.open("assets/test_penguin.png")
     icon_bmp.thumbnail((display.width - 10, display.height - 10))
-    display.frame_buf.paste(icon_bmp)
+    display.frame_buf.paste(icon_bmp) # OK
     display.draw_full(constants.DisplayModes.GC16)
     sleep(8)
 
@@ -68,7 +78,7 @@ if __name__ == '__main__':
             print("refresh weather")
         new_weather_data = climacell.display_data_if_any(display)
         # + code to get data from BME680
-        display.draw_partial(constants.DisplayModes.GC16)
+        display.draw_partial(constants.DisplayModes.GL16)
 
         elapsed_time = datetime.now() - start_time
         if elapsed_time.total_seconds() < 1:
