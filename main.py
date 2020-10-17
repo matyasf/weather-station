@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 
 from PIL import ImageFont, ImageDraw, Image
 from IT8951.display import VirtualEPDDisplay, AutoEPDDisplay, AutoDisplay
+
+from controllers.BME680Controller import BME680Controller
 from controllers.ClimacellController import ClimacellController
 from IT8951 import constants
 
@@ -65,22 +67,28 @@ def draw_test_penguin():
 if __name__ == '__main__':
     args = parse_args()
     climacell = ClimacellController()
+    bme680 = BME680Controller()
     display = init_display()
     display.draw_full(constants.DisplayModes.GC16)
     time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 185)
     last_weather_refresh_time = datetime.fromisoformat("2000-01-01")
+    last_bme_refresh_time = datetime.fromisoformat("2000-01-01")
     while True:
-        start_time = datetime.now()
+        now_time = datetime.now()
         refresh_time_text(display)
-        if (last_weather_refresh_time + timedelta(seconds=AppConstants.climacell_api_refresh_secs)) < start_time:
-            last_weather_refresh_time = start_time
+        if (last_weather_refresh_time + timedelta(seconds=AppConstants.climacell_api_refresh_secs)) < now_time:
+            last_weather_refresh_time = now_time
             climacell.fetch_weather()
             print("refresh weather")
+        if (last_bme_refresh_time + timedelta(seconds=AppConstants.bme680_refresh_secs)) < now_time:
+            last_bme_refresh_time = now_time
+            bme680.display_sensor_data(display)
+            print("refresh sensor")
         new_weather_data = climacell.display_data_if_any(display)
         # + code to get data from BME680
         display.draw_partial(constants.DisplayModes.GL16)
 
-        elapsed_time = datetime.now() - start_time
+        elapsed_time = datetime.now() - now_time
         if elapsed_time.total_seconds() < 1:
             sleep_duration = 1 - elapsed_time.total_seconds() - 0.01
             print("sleep " + str(sleep_duration) + " secs")

@@ -81,7 +81,7 @@ class ClimacellController:
 
     def on_future_complete(self, future: Future):
         if future.exception():
-            self.error_msg = ":-[ " + repr(future.exception())
+            self.error_msg = ":'-( Climacell: " + repr(future.exception())
             self.error_msg = '\n'.join(self.error_msg[i:i + 40] for i in range(0, len(self.error_msg), 40))
             print("ClimacellController raised error: " + self.error_msg)
 
