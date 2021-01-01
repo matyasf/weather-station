@@ -5,6 +5,6 @@ class AppConstants:
 
     # climacell returns forecast in UTC, this is needed to convert it to local time
     local_time_zone = "Europe/Budapest"
-    climacell_api_refresh_secs = 5
+    climacell_api_refresh_secs = 30
     bme680_refresh_secs = 4
 

@@ -70,6 +70,7 @@ if __name__ == '__main__':
     bme680 = BME680Controller()
     display = init_display()
     display.draw_full(constants.DisplayModes.GC16)
+    print("current time is: " + str(datetime.now()))
     time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 185)
     last_weather_refresh_time = datetime.fromisoformat("2000-01-01")
     last_bme_refresh_time = datetime.fromisoformat("2000-01-01")
@@ -91,5 +92,5 @@ if __name__ == '__main__':
         elapsed_time = datetime.now() - now_time
         if elapsed_time.total_seconds() < 1:
             sleep_duration = 1 - elapsed_time.total_seconds() - 0.01
-            print("sleep " + str(sleep_duration) + " secs")
+            #print("sleep " + str(sleep_duration) + " secs")
             sleep(sleep_duration)

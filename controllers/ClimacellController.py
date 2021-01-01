@@ -41,7 +41,7 @@ class ClimacellController:
         self.future_forecasts = [future_forecast for future_forecast in decoded if
                             future_forecast.observation_time > datetime.now(ZoneInfo(AppConstants.local_time_zone))]
         self.error_msg = ""
-        print("decoded")
+        print("Decoded climacell response. length:" + str(len(decoded)) + " in future: " + str(len(self.future_forecasts)))
 
     def display_data_if_any(self, display: AutoDisplay):
         icon_y = 350
@@ -53,8 +53,10 @@ class ClimacellController:
             image_draw.multiline_text((5, icon_y), text=self.error_msg, font=self.font)
             return
         if self.future_forecasts is None:
+            print("No new climacell forecast to display")
             return
 
+        print("displaying climacell data")
         image_draw = ImageDraw.Draw(display.frame_buf)
         display.frame_buf.paste(0xFF, box=(5, icon_y, 780, icon_y + 245))
         for num, forecast in enumerate(self.future_forecasts):
@@ -90,17 +92,17 @@ class ClimacellController:
         # from 16:00UTC = 18:00 BP time
         response.text = '[{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44)) + ',"units":"C"},' \
                         '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":100,"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2020-12-12T16:00:00.000Z"}},' \
+                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T16:00:00.000Z"}},' \
                         '{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44)) + ',"units":"C"},' \
                         '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":' + str(random.randrange(0, 100)) + ',"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2020-12-12T17:00:00.000Z"}},' \
+                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T17:00:00.000Z"}},' \
                         '{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44))+ ',"units":"C"},' \
                         '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":' + str(random.randrange(0, 100)) + ',"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2020-12-12T18:00:00.000Z"}},' \
+                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T18:00:00.000Z"}},' \
                         '{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44)) + ',"units":"C"},' \
                         '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":' + str(random.randrange(0, 100)) + ',"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2020-12-12T19:00:00.000Z"}},' \
+                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T19:00:00.000Z"}},' \
                         '{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44)) + ',"units":"C"},' \
                         '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":' + str(random.randrange(0, 100)) + ',"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2020-12-12T20:00:00.000Z"}}]'
+                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T20:00:00.000Z"}}]'
         return response

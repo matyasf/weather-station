@@ -31,10 +31,11 @@ class BME680Controller:
             print("could not get sensor data!")
         image_draw = ImageDraw.Draw(display.frame_buf)
         display.frame_buf.paste(0xFF, box=(5, text_y_start, 780, text_y_start + 140))
+        "{:+.2f}".format(self.sensor.data.temperature)
         image_draw.text((10, text_y_start),
-                        text=str(self.sensor.data.temperature) + "°C", font=self.font)
-        image_draw.text((380, text_y_start),
-                        text=str(self.sensor.data.humidity) + "%", font=self.font)
+                        text="{:.1f}".format(self.sensor.data.temperature) + "°C", font=self.font)
+        image_draw.text((410, text_y_start),
+                        text="{:.1f}".format(self.sensor.data.humidity) + "%", font=self.font)
 
         if self.sensor.data.heat_stable:
             print('sensor.data.gas_resistance: ' + str(self.sensor.data.gas_resistance))
