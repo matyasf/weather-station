@@ -2,6 +2,8 @@ import json
 import random
 from asyncio import Future
 from typing import List
+
+import requests
 from PIL import ImageFont, ImageDraw, Image
 
 from IT8951.display import AutoDisplay
@@ -35,8 +37,8 @@ class ClimacellController:
                        "start_time": "now",
                        "end_time": time_end, "fields": "precipitation_probability,temp,precipitation_type,weather_code",
                        "apikey": "u0q4InQgQv6dd5scyrcwy9oP0w10G1yo"}
-        # response = requests.request("GET", url, params=querystring)
-        response = self.test_response()
+        response = requests.request("GET", url, params=querystring)
+        # response = self.test_response()
         decoded: List[ClimacellResponse] = json.loads(response.text, object_hook=climacell_response_decoder)
         self.future_forecasts = [future_forecast for future_forecast in decoded if
                             future_forecast.observation_time > datetime.now(ZoneInfo(AppConstants.local_time_zone))]
@@ -53,7 +55,7 @@ class ClimacellController:
             image_draw.multiline_text((5, icon_y), text=self.error_msg, font=self.font)
             return
         if self.future_forecasts is None:
-            print("No new climacell forecast to display")
+            #print("No new climacell forecast to display")
             return
 
         print("displaying climacell data")
@@ -77,7 +79,7 @@ class ClimacellController:
                             text=str(forecast.temp) + "°C", font=self.font)
             rain_icon = Image.open("assets/umbrella-rain-icon.png")
             display.frame_buf.paste(rain_icon, (5 + num * column_width, text_y_start + 106))
-            image_draw.text((10 + num * column_width + 25, text_y_start + 98),
+            image_draw.text((10 + num * column_width + 26, text_y_start + 98),
                             text=str(forecast.precipitation_probability) + "%", font=self.font)
         self.future_forecasts = None
 
