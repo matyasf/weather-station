@@ -8,7 +8,7 @@ You can set it to auto-run on startup e.g. by putting this into `/etc/rc.local` 
 
 ```
 cd /home/pi/CODE/weather-project/weather-station &&
-python main.py &>> log.txt &
+sudo bash -c 'python -u main.py &>> /home/pi/CODE/weather-project/weather-station/log.txt' &
 ```
 
 (put this before `exit 0`)
