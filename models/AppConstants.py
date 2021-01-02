@@ -9,4 +9,6 @@ class AppConstants:
     # 100 calls/day = 4 calls/hour for air quality
     climacell_api_refresh_secs = 2400 # 2400 secs = 30 mins
     bme680_refresh_secs = 4
+    # see https://github.com/pimoroni/bme680-python/issues/11
+    bme680_temperature_offset = -4
 

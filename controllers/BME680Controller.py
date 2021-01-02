@@ -2,6 +2,8 @@ import bme680
 from IT8951.display import AutoDisplay
 from PIL import ImageFont, ImageDraw
 
+from models import AppConstants
+
 
 class BME680Controller:
 
@@ -13,6 +15,7 @@ class BME680Controller:
         if self.sensor is None:
             print("could not init sensor!")
         self.font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 100)
+        self.sensor.set_temp_offset(AppConstants.AppConstants.bme680_temperature_offset)
         self.sensor.set_humidity_oversample(bme680.OS_2X)
         self.sensor.set_pressure_oversample(bme680.OS_4X)
         self.sensor.set_temperature_oversample(bme680.OS_8X)
