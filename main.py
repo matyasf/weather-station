@@ -1,4 +1,5 @@
 import argparse
+import sys
 from time import sleep
 from datetime import datetime, timedelta
 
@@ -84,7 +85,7 @@ if __name__ == '__main__':
         if (last_bme_refresh_time + timedelta(seconds=AppConstants.bme680_refresh_secs)) < now_time:
             last_bme_refresh_time = now_time
             bme680.display_sensor_data(display)
-            print("refresh sensor")
+            # print("refresh BME680 sensor")
         new_weather_data = climacell.display_data_if_any(display)
         # + code to get data from BME680
         display.draw_partial(constants.DisplayModes.GL16)
@@ -92,5 +93,6 @@ if __name__ == '__main__':
         elapsed_time = datetime.now() - now_time
         if elapsed_time.total_seconds() < 1:
             sleep_duration = 1 - elapsed_time.total_seconds() - 0.01
-            #print("sleep " + str(sleep_duration) + " secs")
+            # print("sleep " + str(sleep_duration) + " secs")
             sleep(sleep_duration)
+        sys.stdout.flush()
