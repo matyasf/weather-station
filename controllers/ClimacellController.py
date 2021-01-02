@@ -77,10 +77,11 @@ class ClimacellController:
                             text=forecast.observation_time.strftime("%H:%M"), font=self.font)
             image_draw.text((10 + num * column_width, text_y_start + 50),
                             text=str(forecast.temp) + "°C", font=self.font)
-            rain_icon = Image.open("assets/umbrella-rain-icon.png")
-            display.frame_buf.paste(rain_icon, (5 + num * column_width, text_y_start + 106))
-            image_draw.text((10 + num * column_width + 26, text_y_start + 98),
-                            text=str(forecast.precipitation_probability) + "%", font=self.font)
+            if forecast.precipitation_probability > 0:
+                rain_icon = Image.open("assets/umbrella-rain-icon.png")
+                display.frame_buf.paste(rain_icon, (5 + num * column_width, text_y_start + 106))
+                image_draw.text((10 + num * column_width + 26, text_y_start + 98),
+                                text=str(forecast.precipitation_probability) + "%", font=self.font)
         self.future_forecasts = None
 
     def on_future_complete(self, future: Future):

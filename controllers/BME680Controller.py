@@ -34,7 +34,7 @@ class BME680Controller:
         "{:+.2f}".format(self.sensor.data.temperature)
         image_draw.text((10, text_y_start),
                         text="{:.1f}".format(self.sensor.data.temperature) + "°C", font=self.font)
-        image_draw.text((410, text_y_start),
+        image_draw.text((420, text_y_start),
                         text="{:.1f}".format(self.sensor.data.humidity) + "%", font=self.font)
 
         if self.sensor.data.heat_stable:

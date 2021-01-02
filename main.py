@@ -41,9 +41,9 @@ def init_display():
 
 def refresh_time_text(display: AutoDisplay):
     image_draw = ImageDraw.Draw(display.frame_buf)
-    image_draw.rectangle((5, 5, 780, 145), fill=255)
+    image_draw.rectangle((5, 5, 780, 210), fill=255)
     now = datetime.now()
-    image_draw.text((5, -50), text=now.strftime("%H:%M:%S"), font=time_font)
+    image_draw.text((60, -55), text=now.strftime("%H:%M"), font=time_font)
 
 
 def draw_test_penguin():
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     display = init_display()
     display.draw_full(constants.DisplayModes.GC16)
     print("current time is: " + str(datetime.now()))
-    time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 185)
+    time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 250)
     last_weather_refresh_time = datetime.fromisoformat("2000-01-01")
     last_bme_refresh_time = datetime.fromisoformat("2000-01-01")
     while True:
