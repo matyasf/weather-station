@@ -7,6 +7,8 @@ import requests
 from PIL import ImageFont, ImageDraw, Image
 
 from IT8951.display import AutoDisplay
+
+from Utils import Utils
 from models.climacell import climacell_yr_mapping
 from models.climacell.ClimacellResponse import climacell_response_decoder, ClimacellResponse
 from models.AppConstants import AppConstants
@@ -23,13 +25,13 @@ class ClimacellController:
         self.font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 40)
         self.error_msg = ""
 
-    def fetch_weather(self):
+    def fetch_weather(self) -> None:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             fut = executor.submit(self.download_climacell_response)
             fut.add_done_callback(self.on_future_complete)
         # + code to display it
 
-    def download_climacell_response(self):
+    def download_climacell_response(self) -> None:
         # +put here error handling
         time_end = (datetime.utcnow() + timedelta(hours=5)).replace(microsecond=0).isoformat()
         url = "https://api.climacell.co/v3/weather/forecast/hourly"  # returns hourly results, time in GMT
@@ -43,9 +45,9 @@ class ClimacellController:
         self.future_forecasts = [future_forecast for future_forecast in decoded if
                             future_forecast.observation_time > datetime.now(ZoneInfo(AppConstants.local_time_zone))]
         self.error_msg = ""
-        print(str(datetime.utcnow()) + " decoded climacell response. length:" + str(len(decoded)) + " in future: " + str(len(self.future_forecasts)))
+        Utils.log("decoded climacell response. length:" + str(len(decoded)) + " in future: " + str(len(self.future_forecasts)))
 
-    def display_data_if_any(self, display: AutoDisplay):
+    def display_data_if_any(self, display: AutoDisplay) -> None:
         icon_y = 350
         text_y_start = 452
         column_width = 165
@@ -55,10 +57,10 @@ class ClimacellController:
             image_draw.multiline_text((5, icon_y), text=self.error_msg, font=self.font)
             return
         if self.future_forecasts is None:
-            #print("No new climacell forecast to display")
+            #Utils.log("No new climacell forecast to display")
             return
 
-        print(str(datetime.now()) + " displaying climacell data")
+        Utils.log("displaying climacell data")
         image_draw = ImageDraw.Draw(display.frame_buf)
         display.frame_buf.paste(0xFF, box=(5, icon_y, 780, icon_y + 245))
         for num, forecast in enumerate(self.future_forecasts):
@@ -84,13 +86,14 @@ class ClimacellController:
                                 text=str(forecast.precipitation_probability) + "%", font=self.font)
         self.future_forecasts = None
 
-    def on_future_complete(self, future: Future):
+    def on_future_complete(self, future: Future) -> None:
         if future.exception():
             self.error_msg = ":( Climacell: " + repr(future.exception())
             self.error_msg = '\n'.join(self.error_msg[i:i + 40] for i in range(0, len(self.error_msg), 40))
-            print(str(datetime.now()) + " ClimacellController raised error: " + self.error_msg)
+            Utils.log("ClimacellController raised error: " + self.error_msg)
 
-    def test_response(self):
+    @staticmethod
+    def test_response() -> SimpleNamespace:
         response = SimpleNamespace()
         # from 16:00UTC = 18:00 BP time
         response.text = '[{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44)) + ',"units":"C"},' \
