@@ -39,10 +39,4 @@ class BME680Controller:
                         text="{:.1f}".format(self.sensor.data.temperature) + "°C", font=self.font)
         image_draw.text((420, text_y_start),
                         text="{:.1f}".format(self.sensor.data.humidity) + "%", font=self.font)
-
-        if self.sensor.data.heat_stable:
-            pass
-            # print('sensor.data.gas_resistance: ' + str(self.sensor.data.gas_resistance))
-        else:
-            print("heat data is not stable (yet?)")
-
+        # if self.sensor.data.heat_stable: is this for the gas sensor or the temp?

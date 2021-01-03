@@ -43,7 +43,7 @@ class ClimacellController:
         self.future_forecasts = [future_forecast for future_forecast in decoded if
                             future_forecast.observation_time > datetime.now(ZoneInfo(AppConstants.local_time_zone))]
         self.error_msg = ""
-        print("Decoded climacell response. length:" + str(len(decoded)) + " in future: " + str(len(self.future_forecasts)))
+        print(str(datetime.utcnow()) + " decoded climacell response. length:" + str(len(decoded)) + " in future: " + str(len(self.future_forecasts)))
 
     def display_data_if_any(self, display: AutoDisplay):
         icon_y = 350
@@ -58,7 +58,7 @@ class ClimacellController:
             #print("No new climacell forecast to display")
             return
 
-        print("displaying climacell data")
+        print(str(datetime.now()) + " displaying climacell data")
         image_draw = ImageDraw.Draw(display.frame_buf)
         display.frame_buf.paste(0xFF, box=(5, icon_y, 780, icon_y + 245))
         for num, forecast in enumerate(self.future_forecasts):
@@ -86,9 +86,9 @@ class ClimacellController:
 
     def on_future_complete(self, future: Future):
         if future.exception():
-            self.error_msg = ":'-( Climacell: " + repr(future.exception())
+            self.error_msg = ":( Climacell: " + repr(future.exception())
             self.error_msg = '\n'.join(self.error_msg[i:i + 40] for i in range(0, len(self.error_msg), 40))
-            print("ClimacellController raised error: " + self.error_msg)
+            print(str(datetime.now()) + " ClimacellController raised error: " + self.error_msg)
 
     def test_response(self):
         response = SimpleNamespace()
