@@ -10,6 +10,7 @@ from PIL import ImageFont, ImageDraw, Image
 from IT8951.display import AutoDisplay
 
 from Utils import Utils
+from controllers.SunriseSunsetCalculator import SunriseSunsetCalculator
 from models.climacell import climacell_yr_mapping
 from models.climacell.ClimacellResponse import climacell_response_decoder, ClimacellResponse
 from models.AppConstants import AppConstants
@@ -63,12 +64,39 @@ class ClimacellController:
         Utils.log("displaying climacell data")
         image_draw = ImageDraw.Draw(display.frame_buf)
         display.frame_buf.paste(0xFF, box=(5, icon_y, 780, icon_y + 245))
-        for num, forecast in enumerate(self.future_forecasts):
-            # draw icon
+
+        now_time = datetime.now(ZoneInfo(AppConstants.local_time_zone))
+        timezone_offset = int(now_time.utcoffset() / timedelta(hours=1))
+        sunrise = SunriseSunsetCalculator.calculate_sunrise(
+            AppConstants.forecast_lat, AppConstants.forecast_lon, timezone_offset).astimezone(ZoneInfo(AppConstants.local_time_zone))
+        sunrise_displayed = False
+        sunset = SunriseSunsetCalculator.calculate_sunset(
+            AppConstants.forecast_lat, AppConstants.forecast_lon, timezone_offset).astimezone(ZoneInfo(AppConstants.local_time_zone))
+        sunset_displayed = False
+        num = 0
+        for forecast in self.future_forecasts:
+            # display sunrise/sunset icon and time.
+            # Note: The sunrise will not be displayed if its before 4am and the time is before midnight because sunrise
+            # is calculated for the current day only. Its also buggy if the sun does not set/rise.
+            if now_time < sunrise < forecast.observation_time and sunrise_displayed == False:
+                icon_bmp = Image.open("assets/yr_icons_100/sunrise.png")
+                display.frame_buf.paste(icon_bmp, (10 + num * column_width, icon_y))
+                image_draw.text((10 + num * column_width, text_y_start),
+                                text=sunrise.strftime("%H:%M"), font=self.font)
+                sunrise_displayed = True
+                num = num + 1
+            if now_time < sunset < forecast.observation_time and sunset_displayed == False:
+                icon_bmp = Image.open("assets/yr_icons_100/sunset.png")
+                display.frame_buf.paste(icon_bmp, (10 + num * column_width, icon_y))
+                image_draw.text((10 + num * column_width, text_y_start),
+                                text=sunset.strftime("%H:%M"), font=self.font)
+                sunset_displayed = True
+                num = num + 1
+            # display weather forecast
             weather_icon: str = climacell_yr_mapping.climacell_yr_map.get(forecast.weather_code)
             # these have day/night variations
             if weather_icon == "03" or weather_icon == "02" or weather_icon == "01":
-                if forecast.observation_time.hour > 7 and forecast.observation_time.hour < 20:
+                if sunrise < forecast.observation_time < sunset:
                     weather_icon = weather_icon + "d"
                 else:
                     weather_icon = weather_icon + "n"
@@ -84,6 +112,7 @@ class ClimacellController:
                 display.frame_buf.paste(rain_icon, (5 + num * column_width, text_y_start + 106))
                 image_draw.text((10 + num * column_width + 26, text_y_start + 98),
                                 text=str(forecast.precipitation_probability) + "%", font=self.font)
+            num = num + 1
         self.future_forecasts = None
 
     def on_future_complete(self, future: Future) -> None:
