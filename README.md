@@ -6,9 +6,14 @@ It uses a Bosch BME680 sensor and a [waveshare 6" e-paper](https://www.waveshare
 
 You can set it to auto-run on startup e.g. by putting this into `/etc/rc.local` on your pi:
 
+Weather provided by [Climacell](https://www.climacell.co/), icons from [yr.no](http://nrkno.github.io/yr-weather-symbols/)
 ```
 cd /home/pi/CODE/weather-project/weather-station &&
 sudo bash -c 'python -u main.py &>> /home/pi/CODE/weather-project/weather-station/log.txt' &
 ```
 
 (put this before `exit 0`)
+
+### License
+
+[Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0)

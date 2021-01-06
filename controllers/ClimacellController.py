@@ -1,5 +1,6 @@
 import json
 import random
+import traceback
 from asyncio import Future
 from typing import List
 
@@ -29,23 +30,23 @@ class ClimacellController:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             fut = executor.submit(self.download_climacell_response)
             fut.add_done_callback(self.on_future_complete)
-        # + code to display it
 
     def download_climacell_response(self) -> None:
-        # +put here error handling
-        time_end = (datetime.utcnow() + timedelta(hours=5)).replace(microsecond=0).isoformat()
-        url = "https://api.climacell.co/v3/weather/forecast/hourly"  # returns hourly results, time in GMT
-        querystring = {"lat": AppConstants.forecast_lat, "lon": AppConstants.forecast_lon, "unit_system": "si",
-                       "start_time": "now",
-                       "end_time": time_end, "fields": "precipitation_probability,temp,precipitation_type,weather_code",
-                       "apikey": "u0q4InQgQv6dd5scyrcwy9oP0w10G1yo"}
+        time_end = (datetime.utcnow() + timedelta(hours=6)).replace(microsecond=0, tzinfo=ZoneInfo(AppConstants.local_time_zone)).isoformat()
+        time_start = (datetime.utcnow().replace(microsecond=0, second=0, minute=0, tzinfo=ZoneInfo(AppConstants.local_time_zone))
+                      + timedelta(hours=1)).isoformat()
+        url = "https://data.climacell.co/v4/timelines"  # returns hourly results, time in GMT
+        querystring = {"location": str(AppConstants.forecast_lat) + "," + str(AppConstants.forecast_lon),
+                    "timesteps":"1h", "apikey": "29D9C1vDbosbtwptFjl1p12gYGVDe462", "endTime": time_end,"startTime": time_start,
+                    "fields": "precipitationProbability,temperature,precipitationType,weatherCode"}
         response = requests.request("GET", url, params=querystring)
         # response = self.test_response()
-        decoded: List[ClimacellResponse] = json.loads(response.text, object_hook=climacell_response_decoder)
-        self.future_forecasts = [future_forecast for future_forecast in decoded if
+        decoded: dict = json.loads(response.text, object_hook=climacell_response_decoder)
+        forecast_list: List[ClimacellResponse] = decoded['data']['timelines'][0]['intervals']
+        self.future_forecasts = [future_forecast for future_forecast in forecast_list if
                             future_forecast.observation_time > datetime.now(ZoneInfo(AppConstants.local_time_zone))]
         self.error_msg = ""
-        Utils.log("decoded climacell response. length:" + str(len(decoded)) + " in future: " + str(len(self.future_forecasts)))
+        Utils.log("Decoded climacell response. length:" + str(len(forecast_list)) + " in future: " + str(len(self.future_forecasts)))
 
     def display_data_if_any(self, display: AutoDisplay) -> None:
         icon_y = 350
@@ -56,8 +57,7 @@ class ClimacellController:
             display.frame_buf.paste(0xFF, box=(5, icon_y, 780, icon_y + 245))
             image_draw.multiline_text((5, icon_y), text=self.error_msg, font=self.font)
             return
-        if self.future_forecasts is None:
-            #Utils.log("No new climacell forecast to display")
+        if self.future_forecasts is None: # No new climacell forecast to display
             return
 
         Utils.log("displaying climacell data")
@@ -90,25 +90,22 @@ class ClimacellController:
         if future.exception():
             self.error_msg = ":( Climacell: " + repr(future.exception())
             self.error_msg = '\n'.join(self.error_msg[i:i + 40] for i in range(0, len(self.error_msg), 40))
-            Utils.log("ClimacellController raised error: " + self.error_msg)
+            Utils.log("ClimacellController raised error:\n" + "".join(traceback.TracebackException.from_exception(future.exception()).format()))
 
     @staticmethod
     def test_response() -> SimpleNamespace:
         response = SimpleNamespace()
-        # from 16:00UTC = 18:00 BP time
-        response.text = '[{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44)) + ',"units":"C"},' \
-                        '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":100,"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T16:00:00.000Z"}},' \
-                        '{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44)) + ',"units":"C"},' \
-                        '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":' + str(random.randrange(0, 100)) + ',"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T17:00:00.000Z"}},' \
-                        '{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44))+ ',"units":"C"},' \
-                        '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":' + str(random.randrange(0, 100)) + ',"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T18:00:00.000Z"}},' \
-                        '{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44)) + ',"units":"C"},' \
-                        '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":' + str(random.randrange(0, 100)) + ',"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T19:00:00.000Z"}},' \
-                        '{"lat":47.524862,"lon":19.082513,"temp":{"value":' + str(random.randrange(-30, 44)) + ',"units":"C"},' \
-                        '"precipitation_type":{"value":"rain"},"precipitation_probability":{"value":' + str(random.randrange(0, 100)) + ',"units":"%"},' \
-                        '"weather_code":{"value":"' + random.choice(list(climacell_yr_mapping.climacell_yr_map)) + '"},"observation_time":{"value":"2021-12-12T20:00:00.000Z"}}]'
+        response.text ="""{"data":{
+        "timelines":
+            [{"timestep":"1h","startTime":"2021-01-05T20:06:48Z","endTime":"2021-01-05T23:06:48Z","intervals":
+                [{"startTime":"2031-01-05T20:06:48Z",
+                "values":{"precipitationProbability":0,"temperature":3.23,"precipitationType":1,"weatherCode":1101}},
+                {"startTime":"2031-01-05T21:06:48Z",
+                "values":{"precipitationProbability":0.6,"temperature":3.12,"precipitationType":2,"weatherCode":1001}},
+                {"startTime":"2031-01-05T22:06:48Z",
+                "values":{"precipitationProbability":5,"temperature":3.09,"precipitationType":2,"weatherCode":1001}},
+                {"startTime":"2031-01-05T23:06:48Z",
+                "values":{"precipitationProbability":5,"temperature":3.2,"precipitationType":2,"weatherCode":1001}}
+            ]}
+        ]}}"""
         return response
