@@ -23,7 +23,7 @@ climacell_yr_map = {
     "1101": "02", # partly cloudy
     "1100": "01", # mostly clear
     "1000": "01", # clear
-    "0": "15", # UNKNOWN
+    "0": "unknown_weather", # UNKNOWN
     "3000": "01", # light wind
     "3001": "01", # wind
     "3002": "01", # strong wind

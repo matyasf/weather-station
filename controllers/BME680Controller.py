@@ -39,4 +39,4 @@ class BME680Controller:
                         text="{:.1f}".format(self.sensor.data.temperature) + "°C", font=self.font)
         image_draw.text((420, text_y_start),
                         text="{:.1f}".format(self.sensor.data.humidity) + "%", font=self.font)
-        # if self.sensor.data.heat_stable: is this for the gas sensor or the temp?
+        # if self.sensor.data.heat_stable: This is for the gas sensor
