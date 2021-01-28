@@ -1,59 +1,55 @@
 import json
 import random
 import traceback
+import requests
+import concurrent.futures
+
 from asyncio import Future
 from typing import List
-
-import requests
-from PIL import ImageFont, ImageDraw, Image
-
-from IT8951.display import AutoDisplay
-
-from Utils import Utils
-from controllers.SunriseSunsetCalculator import SunriseSunsetCalculator
-from models.climacell import climacell_yr_mapping
-from models.climacell.ClimacellResponse import climacell_response_decoder, ClimacellResponse
-from models.AppConstants import AppConstants
+from datetime import datetime, timedelta
 try:
     from zoneinfo import ZoneInfo # TODO test for Pyton 3.9
 except ImportError: # for Python < 3.9
     from backports.zoneinfo import ZoneInfo
-from datetime import datetime, timedelta
-from types import SimpleNamespace
-import concurrent.futures
+from PIL import ImageFont, ImageDraw, Image
+from IT8951.display import AutoDisplay
+from controllers.SunriseSunsetCalculator import SunriseSunsetCalculator
+from models.yr import yr_yr_mapping
+from models.AppConstants import AppConstants
+from models.yr.YrResponse import yr_response_decoder, YrResponse
+from Utils import Utils
 
 
-class ClimacellController:
+class YrController:
     """
-    class to download and display data from climacell.co
-    This API allows 100 requests/day, so one approx. every 15 mins.
+    class to download and display data from yr.no
+    This API wants sends a time how long the results are valid, its approx. 30-40 mins.
     """
     def __init__(self):
-        self.future_forecasts: List[ClimacellResponse] = None
+        self.future_forecasts: List[YrResponse] = None
         self.font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 40)
         self.error_msg = ""
 
     def fetch_weather(self) -> None:
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            fut = executor.submit(self.download_climacell_data)
+            fut = executor.submit(self.download_yr_no_data)
             fut.add_done_callback(self.on_future_complete)
-
-    def download_climacell_data(self) -> None:
-        time_end = (datetime.utcnow() + timedelta(hours=6)).replace(microsecond=0, tzinfo=ZoneInfo(AppConstants.local_time_zone)).isoformat()
-        time_start = (datetime.utcnow().replace(microsecond=0, second=0, minute=0, tzinfo=ZoneInfo(AppConstants.local_time_zone))
-                      + timedelta(hours=1)).isoformat()
-        url = "https://data.climacell.co/v4/timelines"  # returns hourly results, time in GMT
-        querystring = {"location": str(AppConstants.forecast_lat) + "," + str(AppConstants.forecast_lon),
-                    "timesteps":"1h", "apikey": "29D9C1vDbosbtwptFjl1p12gYGVDe462", "endTime": time_end,"startTime": time_start,
-                    "fields": "precipitationProbability,temperature,precipitationType,weatherCode"}
-        response = requests.request("GET", url, params=querystring)
-        # response = self.test_response()
-        decoded: dict = json.loads(response.text, object_hook=climacell_response_decoder)
-        forecast_list: List[ClimacellResponse] = decoded['data']['timelines'][0]['intervals']
+    
+    def download_yr_no_data(self) -> None:
+        url = "https://api.met.no/weatherapi/locationforecast/2.0/compact"  # returns hourly results
+        querystring = {"lat": str(AppConstants.forecast_lat), "lon": str(AppConstants.forecast_lon),
+                       "altitude": "90"}
+        headers = {"user-agent": "weather-station/1.0 https://github.com/matyasf/weather-station",
+                   "Accept": "application/json", "accept-encoding": "gzip, deflate"}
+        response = requests.request("GET", url, params=querystring, headers=headers)
+        decoded: dict = json.loads(response.text, object_hook=yr_response_decoder)
+        forecast_list: List[YrResponse] = decoded['properties']['timeseries']
+        forecast_list = forecast_list[:6]
         self.future_forecasts = [future_forecast for future_forecast in forecast_list if
                             future_forecast.observation_time > datetime.now(ZoneInfo(AppConstants.local_time_zone))]
         self.error_msg = ""
-        Utils.log("Decoded climacell response. length:" + str(len(forecast_list)) + " in future: " + str(len(self.future_forecasts)))
+        Utils.log("Decoded yr.no response. length:" + str(len(forecast_list)) + " in future: " + str(len(self.future_forecasts)))
+
 
     def display_data_if_any(self, display: AutoDisplay) -> None:
         icon_y = 350
@@ -67,7 +63,7 @@ class ClimacellController:
         if self.future_forecasts is None: # No new forecast to display
             return
 
-        Utils.log("displaying climacell data")
+        Utils.log("displaying yr.no data")
         image_draw = ImageDraw.Draw(display.frame_buf)
         display.frame_buf.paste(0xFF, box=(5, icon_y, 780, icon_y + 245))
 
@@ -98,8 +94,8 @@ class ClimacellController:
                                 text=sunset.strftime("%H:%M"), font=self.font)
                 sunset_displayed = True
                 num = num + 1
-            # display weather forecast
-            weather_icon: str = climacell_yr_mapping.climacell_yr_map.get(forecast.weather_code)
+            # display weather forecast TODO
+            weather_icon: str = yr_yr_mapping.yr_yr_map.get(forecast.weather_code)
             # these have day/night variations
             if weather_icon == "03" or weather_icon == "02" or weather_icon == "01":
                 if sunrise < forecast.observation_time < sunset:
@@ -113,34 +109,16 @@ class ClimacellController:
                             text=forecast.observation_time.strftime("%H:%M"), font=self.font)
             image_draw.text((10 + num * column_width, text_y_start + 50),
                             text=str(forecast.temp) + "°C", font=self.font)
-            if forecast.precipitation_probability > 0:
+            if forecast.precipitation_amount > 0:
                 rain_icon = Image.open("assets/umbrella-rain-icon.png")
                 display.frame_buf.paste(rain_icon, (5 + num * column_width, text_y_start + 106))
                 image_draw.text((10 + num * column_width + 26, text_y_start + 98),
-                                text=str(forecast.precipitation_probability) + "%", font=self.font)
+                                text=str(forecast.precipitation_amount) + "mm", font=self.font)
             num = num + 1
         self.future_forecasts = None
 
     def on_future_complete(self, future: Future) -> None:
         if future.exception():
-            self.error_msg = ":( Climacell: " + repr(future.exception())
+            self.error_msg = ":( Yr: " + repr(future.exception())
             self.error_msg = '\n'.join(self.error_msg[i:i + 40] for i in range(0, len(self.error_msg), 40))
-            Utils.log("ClimacellController raised error:\n" + "".join(traceback.TracebackException.from_exception(future.exception()).format()))
-
-    @staticmethod
-    def test_response() -> SimpleNamespace:
-        response = SimpleNamespace()
-        response.text ="""{"data":{
-        "timelines":
-            [{"timestep":"1h","startTime":"2021-01-05T20:06:48Z","endTime":"2021-01-05T23:06:48Z","intervals":
-                [{"startTime":"2031-01-05T20:06:48Z",
-                "values":{"precipitationProbability":0,"temperature":3.23,"precipitationType":1,"weatherCode":1101}},
-                {"startTime":"2031-01-05T21:06:48Z",
-                "values":{"precipitationProbability":0.6,"temperature":3.12,"precipitationType":2,"weatherCode":1001}},
-                {"startTime":"2031-01-05T22:06:48Z",
-                "values":{"precipitationProbability":5,"temperature":3.09,"precipitationType":2,"weatherCode":1001}},
-                {"startTime":"2031-01-05T23:06:48Z",
-                "values":{"precipitationProbability":5,"temperature":3.2,"precipitationType":2,"weatherCode":1001}}
-            ]}
-        ]}}"""
-        return response
+            Utils.log("YrController raised error:\n" + "".join(traceback.TracebackException.from_exception(future.exception()).format()))

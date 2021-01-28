@@ -13,7 +13,9 @@ sudo bash -c 'python -u main.py &>> /home/pi/CODE/weather-project/weather-statio
 
 (put this before `exit 0`)
 
-Weather forecast provided by [Climacell](https://www.climacell.co/), icons from [yr.no](http://nrkno.github.io/yr-weather-symbols/)
+Weather forecast provided by [Climacell](https://www.climacell.co/) and [yr.no](https://www.yr.no), icons from [yr.no](http://nrkno.github.io/yr-weather-symbols/)
+
+yr.no stuff is under (CC 4.0 BY and MIT license)[https://api.met.no/doc/License]
 
 ### License
 

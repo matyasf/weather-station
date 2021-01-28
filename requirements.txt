@@ -1,6 +1,6 @@
 RPi.GPIO~=0.7.0
 pillow~=8.1.0
 requests~=2.25.0
-backports.zoneinfo~=0.2.1
+backports.zoneinfo~=0.2.1;python_version<"3.9"
 IT8951~=0.1.0
 BME680~=1.0.5

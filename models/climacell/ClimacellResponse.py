@@ -1,5 +1,8 @@
 from datetime import datetime
-from backports.zoneinfo import ZoneInfo
+try:
+    from zoneinfo import ZoneInfo # TODO test for Pyton 3.9
+except ImportError: # for Python < 3.9
+    from backports.zoneinfo import ZoneInfo
 from models.AppConstants import AppConstants
 
 
