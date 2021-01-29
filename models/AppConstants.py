@@ -8,7 +8,7 @@ class AppConstants:
     local_time_zone = "Europe/Budapest"
     # 100 calls/day = 4 calls/hour for air quality
     weather_api_refresh_secs = 50 * 60 # mins * seconds_in_a_minute
-    bme680_refresh_secs = 5
+    bme680_refresh_secs = 15
     # see https://github.com/pimoroni/bme680-python/issues/11
     bme680_temperature_offset = -4
 

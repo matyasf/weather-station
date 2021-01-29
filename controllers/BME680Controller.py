@@ -22,7 +22,6 @@ class BME680Controller:
         self.sensor.set_temperature_oversample(bme680.OS_8X)
         self.sensor.set_filter(bme680.FILTER_SIZE_3)
         self.sensor.set_gas_status(bme680.ENABLE_GAS_MEAS)
-        self.sensor.set_gas_status(bme680.ENABLE_HEATER)
         self.sensor.set_gas_heater_temperature(320)
         self.sensor.set_gas_heater_duration(150)
         self.sensor.select_gas_heater_profile(0)
@@ -41,7 +40,7 @@ class BME680Controller:
             display.frame_buf.paste(air_quality, (530, text_y_start + 30))
             gas_resistance = round(self.sensor.data.gas_resistance) # gas resistance in Ohms ~1000 ... 100000++
             # gas_resistance = gas_resistance / 1234 1234 is the baseline reading TODO
-            print("gas resistance:" + str(gas_resistance))
+            Utils.log("gas resistance: " + str(gas_resistance))
             image_draw.text((595, text_y_start),
                         text=str(gas_resistance), font=self.font)           
         else:
