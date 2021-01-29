@@ -11,6 +11,10 @@ class YrResponse(object):
                  weather_code, observation_time):
         self.precipitation_amount: int = precipitation_amount
         self.temp: int = int(temp)
+        if weather_code.endswith("_day"):
+            weather_code = weather_code[:-4]
+        if weather_code.endswith("_night"):
+            weather_code = weather_code[:-6]
         self.weather_code: str = str(weather_code)
         self.observation_time: datetime = (datetime.fromisoformat(observation_time.replace("Z", "+00:00")))\
             .astimezone(ZoneInfo(AppConstants.local_time_zone))

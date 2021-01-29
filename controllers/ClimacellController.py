@@ -61,7 +61,7 @@ class ClimacellController:
         column_width = 165
         if self.error_msg:
             image_draw = ImageDraw.Draw(display.frame_buf)
-            display.frame_buf.paste(0xFF, box=(5, icon_y, 780, icon_y + 245))
+            display.frame_buf.paste(0xFF, box=(5, icon_y, 790, icon_y + 245))
             image_draw.multiline_text((5, icon_y), text=self.error_msg, font=self.font)
             return
         if self.future_forecasts is None: # No new forecast to display
@@ -69,7 +69,7 @@ class ClimacellController:
 
         Utils.log("displaying climacell data")
         image_draw = ImageDraw.Draw(display.frame_buf)
-        display.frame_buf.paste(0xFF, box=(5, icon_y, 780, icon_y + 245))
+        display.frame_buf.paste(0xFF, box=(5, icon_y, 790, icon_y + 245))
 
         now_time = datetime.now(ZoneInfo(AppConstants.local_time_zone))
         timezone_offset = int(now_time.utcoffset() / timedelta(hours=1))

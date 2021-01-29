@@ -82,7 +82,7 @@ def init() -> None:
     while True:
         now_time = datetime.now()
         refresh_time_text(display, time_font)
-        if (last_weather_refresh_time + timedelta(seconds=AppConstants.climacell_api_refresh_secs)) < now_time:
+        if (last_weather_refresh_time + timedelta(seconds=AppConstants.weather_api_refresh_secs)) < now_time:
             last_weather_refresh_time = now_time
             #climacell.fetch_weather()
             yr_no.fetch_weather()
