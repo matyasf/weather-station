@@ -78,8 +78,9 @@ class YrController:
         sunset = SunriseSunsetCalculator.calculate_sunset(
             AppConstants.forecast_lat, AppConstants.forecast_lon, timezone_offset).astimezone(ZoneInfo(AppConstants.local_time_zone))
         sunset_displayed = False
-        rain_icon = Image.open("assets/umbrella-rain-icon.png")
-        display.frame_buf.paste(rain_icon, (5, text_y_start + 106))
+
+        self.display_umbrella_icon_if_there_will_be_rain(display, text_y_start)
+        
         num = 0
         for forecast in self.future_forecasts:
             # display sunrise/sunset icon and time.
@@ -102,7 +103,9 @@ class YrController:
             # display weather forecast
             weather_icon: str = yr_yr_mapping.yr_yr_map.get(forecast.weather_code)
             # these have day/night variations
-            if weather_icon == "03" or weather_icon == "02" or weather_icon == "01" or weather_icon == "05" or weather_icon == "06" or weather_icon == "07": # TODO find the others
+            icons_with_variants = ["01", "02", "03", "05", "06", "07", "08", "20", "21", "24", "25",
+                                   "26", "27", "28", "29", "40", "41", "42", "43", "44", "45"]
+            if weather_icon in icons_with_variants:
                 if sunrise < forecast.observation_time < sunset:
                     weather_icon = weather_icon + "d"
                 else:
@@ -126,6 +129,16 @@ class YrController:
             self.error_msg = '\n'.join(self.error_msg[i:i + 40] for i in range(0, len(self.error_msg), 40))
             Utils.log("YrController raised error:\n" + "".join(traceback.TracebackException.from_exception(future.exception()).format()))
     
+    def display_umbrella_icon_if_there_will_be_rain(self, display, text_y_start):
+        will_there_be_rain = False
+        for forecast in self.future_forecasts:
+            if forecast.precipitation_amount > 0:
+                will_there_be_rain = True
+                break
+        if will_there_be_rain:
+            rain_icon = Image.open("assets/umbrella-rain-icon.png")
+            display.frame_buf.paste(rain_icon, (5, text_y_start + 106))
+
     @staticmethod
     def test_response() -> SimpleNamespace:
         response = SimpleNamespace()
