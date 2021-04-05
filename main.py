@@ -79,6 +79,7 @@ def init() -> None:
     time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 250)
     last_weather_refresh_time = datetime.fromisoformat("2000-01-01")
     last_bme_refresh_time = datetime.fromisoformat("2000-01-01")
+    last_full_refresh_time = datetime.now()
     while True:
         now_time = datetime.now()
         refresh_time_text(display, time_font)
@@ -90,6 +91,10 @@ def init() -> None:
         if (last_bme_refresh_time + timedelta(seconds=AppConstants.bme680_refresh_secs)) < now_time:
             last_bme_refresh_time = now_time
             bme680.display_sensor_data(display)
+        if (last_full_refresh_time + timedelta(seconds=60*30)) < now_time:
+            # do a full refresh sometimes, this removes small ghosting artifacts
+            last_full_refresh_time = now_time
+            display.draw_full(constants.DisplayModes.GC16)
         #climacell.display_data_if_any(display)
         yr_no.display_data_if_any(display)
         display.draw_partial(constants.DisplayModes.GL16)
