@@ -70,8 +70,8 @@ def draw_test_penguin(display_ref: AutoDisplay) -> None:
 
 def init() -> None:
     args = parse_args()
-    #climacell = ClimacellController()
-    yr_no = YrController()
+    climacell = ClimacellController()
+    #yr_no = YrController()
     bme680 = BME680Controller()
     display = init_display(args)
     display.draw_full(constants.DisplayModes.GC16)
@@ -85,9 +85,8 @@ def init() -> None:
         refresh_time_text(display, time_font)
         if (last_weather_refresh_time + timedelta(seconds=AppConstants.weather_api_refresh_secs)) < now_time:
             last_weather_refresh_time = now_time
-            #climacell.fetch_weather()
-            yr_no.fetch_weather()
-            Utils.log(" Refresh weather")
+            climacell.fetch_weather()
+            #yr_no.fetch_weather()
         if (last_bme_refresh_time + timedelta(seconds=AppConstants.bme680_refresh_secs)) < now_time:
             last_bme_refresh_time = now_time
             bme680.display_sensor_data(display)
@@ -95,8 +94,8 @@ def init() -> None:
             # do a full refresh sometimes, this removes small ghosting artifacts
             last_full_refresh_time = now_time
             display.draw_full(constants.DisplayModes.GC16)
-        #climacell.display_data_if_any(display)
-        yr_no.display_data_if_any(display)
+        climacell.display_data_if_any(display)
+        #yr_no.display_data_if_any(display)
         display.draw_partial(constants.DisplayModes.GL16)
 
         elapsed_time = datetime.now() - now_time

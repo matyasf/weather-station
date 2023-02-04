@@ -39,10 +39,10 @@ class ClimacellController:
             fut.add_done_callback(self.on_future_complete)
 
     def download_climacell_data(self) -> None:
-        time_end = (datetime.utcnow() + timedelta(hours=6)).replace(microsecond=0, tzinfo=ZoneInfo(AppConstants.local_time_zone)).isoformat()
+        time_end = (datetime.utcnow() + timedelta(hours=7)).replace(microsecond=0, tzinfo=ZoneInfo(AppConstants.local_time_zone)).isoformat()
         time_start = (datetime.utcnow().replace(microsecond=0, second=0, minute=0, tzinfo=ZoneInfo(AppConstants.local_time_zone))
                       + timedelta(hours=1)).isoformat()
-        url = "https://data.climacell.co/v4/timelines"  # returns hourly results, time in GMT
+        url = "https://api.tomorrow.io/v4/timelines"  # returns hourly results, time in GMT
         querystring = {"location": str(AppConstants.forecast_lat) + "," + str(AppConstants.forecast_lon),
                     "timesteps":"1h", "apikey": "29D9C1vDbosbtwptFjl1p12gYGVDe462", "endTime": time_end,"startTime": time_start,
                     "fields": "precipitationProbability,temperature,precipitationType,weatherCode"}
@@ -53,7 +53,7 @@ class ClimacellController:
         self.future_forecasts = [future_forecast for future_forecast in forecast_list if
                             future_forecast.observation_time > datetime.now(ZoneInfo(AppConstants.local_time_zone))]
         self.error_msg = ""
-        Utils.log("Decoded climacell response. length:" + str(len(forecast_list)) + " in future: " + str(len(self.future_forecasts)))
+        #Utils.log("Decoded climacell response. length:" + str(len(forecast_list)) + " in future: " + str(len(self.future_forecasts)))
 
     def display_data_if_any(self, display: AutoDisplay) -> None:
         icon_y = 350

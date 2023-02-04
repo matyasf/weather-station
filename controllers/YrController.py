@@ -50,7 +50,7 @@ class YrController:
         self.future_forecasts = [future_forecast for future_forecast in forecast_list if
                             future_forecast.observation_time > datetime.now(ZoneInfo(AppConstants.local_time_zone))]
         self.error_msg = ""
-        Utils.log("Decoded yr.no response. length:" + str(len(forecast_list)) + " in future: " + str(len(self.future_forecasts)))
+        #Utils.log("Decoded yr.no response. length:" + str(len(forecast_list)) + " in future: " + str(len(self.future_forecasts)))
 
 
     def display_data_if_any(self, display: AutoDisplay) -> None:
