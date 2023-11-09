@@ -1,6 +1,7 @@
-RPi.GPIO~=0.7.0
-pillow~=8.1.0
-requests~=2.25.0
+RPi.GPIO~=0.7.1
+pillow~=9.4.0
+requests~=2.28.2
 #backports.zoneinfo~=0.2.1;python_version<"3.9" -- needed only for Python < 3.9
 #IT8951~=0.1.0 -- is not in Pip, needs to be installed locally
-BME680~=1.0.5
+BME680~=1.1.1
+libtado==3.7.7

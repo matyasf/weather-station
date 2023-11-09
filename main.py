@@ -11,6 +11,7 @@ from Utils import Utils
 from controllers.BME680Controller import BME680Controller
 from controllers.ClimacellController import ClimacellController
 from controllers.YrController import YrController
+from controllers.TadoController import TadoController
 from IT8951 import constants
 
 from models.AppConstants import AppConstants
@@ -70,7 +71,8 @@ def draw_test_penguin(display_ref: AutoDisplay) -> None:
 
 def init() -> None:
     args = parse_args()
-    climacell = ClimacellController()
+    #climacell = ClimacellController()
+    tado = TadoController()
     #yr_no = YrController()
     bme680 = BME680Controller()
     display = init_display(args)
@@ -79,14 +81,18 @@ def init() -> None:
     time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 250)
     last_weather_refresh_time = datetime.fromisoformat("2000-01-01")
     last_bme_refresh_time = datetime.fromisoformat("2000-01-01")
+    last_tado_refresh_time = datetime.fromisoformat("2000-01-01")
     last_full_refresh_time = datetime.now()
     while True:
         now_time = datetime.now()
         refresh_time_text(display, time_font)
         if (last_weather_refresh_time + timedelta(seconds=AppConstants.weather_api_refresh_secs)) < now_time:
             last_weather_refresh_time = now_time
-            climacell.fetch_weather()
+            #climacell.fetch_weather() ## better, use this!
             #yr_no.fetch_weather()
+        if (last_tado_refresh_time + timedelta(seconds=AppConstants.tado_refresh_secs)) < now_time:
+            last_tado_refresh_time = now_time
+            tado.fetch_heating_data()
         if (last_bme_refresh_time + timedelta(seconds=AppConstants.bme680_refresh_secs)) < now_time:
             last_bme_refresh_time = now_time
             bme680.display_sensor_data(display)
@@ -94,13 +100,14 @@ def init() -> None:
             # do a full refresh sometimes, this removes small ghosting artifacts
             last_full_refresh_time = now_time
             display.draw_full(constants.DisplayModes.GC16)
-        climacell.display_data_if_any(display)
+        #climacell.display_data_if_any(display)
         #yr_no.display_data_if_any(display)
+        tado.display_data_if_any(display)
         display.draw_partial(constants.DisplayModes.GL16)
 
         elapsed_time = datetime.now() - now_time
-        if elapsed_time.total_seconds() < 1:
-            sleep_duration = 1 - elapsed_time.total_seconds()
+        if elapsed_time.total_seconds() < 2: # wait until 2 secods have elapsed before refresh
+            sleep_duration = 2 - elapsed_time.total_seconds()
             sleep(sleep_duration)
         sys.stdout.flush()
 
