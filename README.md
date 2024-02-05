@@ -8,6 +8,10 @@ It uses a Bosch BME680 sensor [from pimoroni](https://shop.pimoroni.com/products
 
 You need to have the [IT8951 library](https://github.com/GregDMeyer/IT8951) locally on the pi, since its not on pypi.org.
 
+Install dependencies `pip install -r requirements.txt` and run `main.py`.
+
+Copy `secrets.env.template` to `secrets.env` and fill in you Tado API details for how see https://github.com/germainlefebvre4/libtado
+
 You can set it to auto-run on startup e.g. by putting this into `/etc/rc.local` on your pi:
 
 ```

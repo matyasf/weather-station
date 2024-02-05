@@ -1,10 +1,11 @@
 import libtado.api
 import traceback
-from PIL import ImageFont, ImageDraw, Image
+from PIL import ImageFont, ImageDraw
 from IT8951.display import AutoDisplay
 from Utils import Utils
 import concurrent.futures
 from asyncio import Future
+from models.AppConstants import AppConstants
 
 
 class TadoController:
@@ -13,7 +14,7 @@ class TadoController:
     https://github.com/germainlefebvre4/libtado#usage
     """
     def __init__(self):
-        self.tado = libtado.api.Tado('EMAIL', 'PASS', 'WEB_SECRET')
+        self.tado = libtado.api.Tado(AppConstants.tado_username, AppConstants.tado_password, AppConstants.tado_secret)
         self.tado_data = None
         self.font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 38)
         self.large_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 65)
@@ -32,7 +33,9 @@ class TadoController:
             dat = {}
             dat['name'] = self.find_zone_name(zones, key)
             dat['current_temperature'] = format(value['sensorDataPoints']['insideTemperature']['celsius'], '.1f')
-            dat['target_temperature'] = format(value['setting']['temperature']['celsius'], '.1f')
+            dat['target_temperature'] = "N/A" # happens if heating is off
+            if value and value['setting'] and value['setting']['temperature'] and value['setting']['temperature']['celsius']:
+                dat['target_temperature'] = format(value['setting']['temperature']['celsius'], '.1f')
             self.tado_data.append(dat)
 
     def find_zone_name(self, zones, id) -> str:
@@ -44,9 +47,10 @@ class TadoController:
 
     def on_future_complete(self, future: Future) -> None:
         if future.exception():
-            self.error_msg = ":( tado: " + repr(future.exception())
+            self.error_msg = ":( Tado: " + repr(future.exception())
             self.error_msg = '\n'.join(self.error_msg[i:i + 40] for i in range(0, len(self.error_msg), 40))
             Utils.log("TadoController raised error:\n" + "".join(traceback.TracebackException.from_exception(future.exception()).format()))
+            self.tado_data = None
         else:
             self.error_msg = None
 

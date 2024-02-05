@@ -1,4 +1,5 @@
 log.txt
+secrets.env
 venv/*
 .idea/*
 **/__pycache__

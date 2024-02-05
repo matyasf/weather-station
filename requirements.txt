@@ -5,3 +5,4 @@ requests~=2.28.2
 #IT8951~=0.1.0 -- is not in Pip, needs to be installed locally
 BME680~=1.1.1
 libtado==3.7.7
+python-dotenv==1.0.1
