@@ -45,9 +45,9 @@ def init_display(args) -> AutoDisplay:
 
 def refresh_time_text(display_ref: AutoDisplay, time_font: FreeTypeFont) -> None:
     image_draw = ImageDraw.Draw(display_ref.frame_buf)
-    image_draw.rectangle((5, 5, 780, 210), fill=255)
+    image_draw.rectangle((5, 5, 780, 250), fill=255)
     now = datetime.now()
-    image_draw.text((60, -55), text=now.strftime("%H:%M"), font=time_font)
+    image_draw.text((5, -40), text=now.strftime("%H:%M"), font=time_font)
 
 
 def draw_test_penguin(display_ref: AutoDisplay) -> None:
@@ -78,7 +78,7 @@ def init() -> None:
     display = init_display(args)
     display.draw_full(constants.DisplayModes.GC16)
     Utils.log("starting")
-    time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 250)
+    time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 280)
     last_weather_refresh_time = datetime.fromisoformat("2000-01-01")
     last_bme_refresh_time = datetime.fromisoformat("2000-01-01")
     last_tado_refresh_time = datetime.fromisoformat("2000-01-01")

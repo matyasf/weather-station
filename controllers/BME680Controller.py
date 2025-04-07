@@ -30,12 +30,12 @@ class BME680Controller:
     def display_sensor_data(self, display: AutoDisplay) -> None:
         if self.sensor is None:
             pass
-        text_y_start = 225
+        text_y_start = 265
         if self.sensor.get_sensor_data() is False:
             Utils.log("could not get BME sensor data!")
         image_draw = ImageDraw.Draw(display.frame_buf)
         display.frame_buf.paste(0xFF, box=(5, text_y_start, 790, text_y_start + 105))
-        self.draw_temp_and_humidity(image_draw, text_y_start, 60, 460)
+        self.draw_temp_and_humidity(image_draw, text_y_start, 60, 470)
         #if self.sensor.data.heat_stable:
         #    self.draw_temp_and_humidity(image_draw, text_y_start, 7, 305)
         #    self.draw_gas_resistance(text_y_start, image_draw, display)
