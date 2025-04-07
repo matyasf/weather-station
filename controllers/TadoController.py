@@ -6,7 +6,7 @@ from Utils import Utils
 import concurrent.futures
 from asyncio import Future
 from models.AppConstants import AppConstants
-from requests import HTTPError
+from requests.exceptions import RequestException
 
 class TadoController:
     """
@@ -20,8 +20,21 @@ class TadoController:
         self.error_msg: str = None
         self.tado: Tado = None
         try:
-            self.tado = Tado(AppConstants.tado_username, AppConstants.tado_password, AppConstants.tado_secret)
-        except HTTPError as err:
+            self.tado = Tado(token_file_path='./libtado_refresh_token.json')
+            status = self.tado.get_device_activation_status()
+            if status == "PENDING":
+                url = self.tado.get_device_verification_url()
+                self.error_msg = 'TADO needs manual login via console :/ ' + url
+                # to auto-open the browser (on a desktop device), un-comment the following line:
+                # webbrowser.open_new_tab(url)
+                self.tado.device_activation()
+                status = self.tado.get_device_activation_status()
+            if status == "COMPLETED":
+                Utils.log("Tado login successful")
+            else:
+                Utils.log(f"Tado login status is {status}")
+                self.error_msg = f"Tado login status is {status}"
+        except RequestException as err:
             errs = "Tado error:" + str(err)
             self.error_msg = '\n'.join(errs[i:i + 40] for i in range(0, len(errs), 40))
             Utils.log(errs)

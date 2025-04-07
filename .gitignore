@@ -1,5 +1,6 @@
 log.txt
 secrets.env
+libtado_refresh_token.json
 venv/*
 .idea/*
 **/__pycache__

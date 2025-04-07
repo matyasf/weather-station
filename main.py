@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from PIL import ImageFont, ImageDraw, Image
 from IT8951.display import VirtualEPDDisplay, AutoEPDDisplay, AutoDisplay
 from PIL.ImageFont import FreeTypeFont
-from dotenv import dotenv_values
 
 from Utils import Utils
 from controllers.BME680Controller import BME680Controller
@@ -71,10 +70,6 @@ def draw_test_penguin(display_ref: AutoDisplay) -> None:
 
 def init() -> None:
     args = parse_args()
-    config = dotenv_values("secrets.env")
-    AppConstants.tado_username = config["tado_username"]
-    AppConstants.tado_password = config["tado_password"]
-    AppConstants.tado_secret = config["tado_secret"]
 
     #climacell = ClimacellController()
     tado = TadoController()
