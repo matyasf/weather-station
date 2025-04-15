@@ -1,7 +1,7 @@
 log.txt
 secrets.env
 libtado_refresh_token.json
-venv/*
+myenv/*
 .idea/*
 **/__pycache__
 **/Thumbs.db

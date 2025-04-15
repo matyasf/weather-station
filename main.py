@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import sys
 from time import sleep
@@ -36,7 +38,7 @@ def init_display(args) -> AutoDisplay:
         # says the max is 24 MHz (24000000), but my device seems to still work as high as
         # 80 MHz (80000000)
         display_ref = AutoEPDDisplay(vcom=-2.06, rotate=args.rotate, spi_hz=24000000)
-        Utils.log('VCOM set to ' + str(display_ref.epd.get_vcom()))
+        #Utils.log('VCOM set to ' + str(display_ref.epd.get_vcom()))
     else:
         display_ref = VirtualEPDDisplay(dims=(800, 600), rotate=args.rotate)
         Utils.log("initializing virtual display")
@@ -77,7 +79,7 @@ def init() -> None:
     bme680 = BME680Controller()
     display = init_display(args)
     display.draw_full(constants.DisplayModes.GC16)
-    Utils.log("starting")
+    Utils.log("starting app")
     time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 280)
     last_weather_refresh_time = datetime.fromisoformat("2000-01-01")
     last_bme_refresh_time = datetime.fromisoformat("2000-01-01")
