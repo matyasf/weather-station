@@ -74,7 +74,7 @@ def init() -> None:
     args = parse_args()
 
     #climacell = ClimacellController()
-    tado = TadoController()
+    #tado = TadoController()
     #yr_no = YrController()
     bme680 = BME680Controller()
     display = init_display(args)
@@ -94,7 +94,7 @@ def init() -> None:
             #yr_no.fetch_weather()
         if (last_tado_refresh_time + timedelta(seconds=AppConstants.tado_refresh_secs)) < now_time:
             last_tado_refresh_time = now_time
-            tado.fetch_heating_data()
+            #tado.fetch_heating_data()
         if (last_bme_refresh_time + timedelta(seconds=AppConstants.bme680_refresh_secs)) < now_time:
             last_bme_refresh_time = now_time
             bme680.display_sensor_data(display)
@@ -104,7 +104,7 @@ def init() -> None:
             display.draw_full(constants.DisplayModes.GC16)
         #climacell.display_data_if_any(display)
         #yr_no.display_data_if_any(display)
-        tado.display_data_if_any(display)
+        #tado.display_data_if_any(display)
         display.draw_partial(constants.DisplayModes.GL16)
 
         elapsed_time = datetime.now() - now_time
