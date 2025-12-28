@@ -53,17 +53,12 @@ def refresh_time_text(display_ref: AutoDisplay, time_font: FreeTypeFont) -> None
 
 
 def draw_test_penguin(display_ref: AutoDisplay) -> None:
-    #icon_bmp2 = Image.open("assets/test_penguin.png")
-    #icon_bmp2 = Image.open("assets/yr_icons_100/01m.png")
-    #icon_bmp2 = icon_bmp2.convert("L")
-    im2 = Image.new('L', (650, 500), 0xFF) # frame_buf
-    image_draw2 = ImageDraw.Draw(im2)
-    #image_draw2.bitmap((0, 0), icon_bmp2)
-    font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 100)
-    image_draw2.text((10, 10), text="12:32:54", font=font)
-    im2.save('test.png')
-
+    #im2 = Image.new('L', (650, 500), 0xFF) # frame_buf
+    #font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 100)
+    #image_draw2.text((10, 10), text="12:32:54", font=font)
+    #im2.save('test.png')
     display_ref.frame_buf.paste(0xFF, box=(0, 0, display_ref.width, display_ref.height))
+    display_ref.draw_full(constants.DisplayModes.GC16)
     icon_bmp = Image.open("assets/test_penguin.png")
     icon_bmp.thumbnail((display_ref.width - 10, display_ref.height - 10))
     display_ref.frame_buf.paste(icon_bmp) # OK
@@ -110,8 +105,11 @@ def init() -> None:
         elapsed_time = datetime.now() - now_time
         if elapsed_time.total_seconds() < 2: # wait until 2 secods have elapsed before refresh
             sleep_duration = 2 - elapsed_time.total_seconds()
+            #print(str(sleep_duration) + " secs slept")
             sleep(sleep_duration)
         sys.stdout.flush()
 
 if __name__ == '__main__':
+    #disp = init_display(parse_args())
+    #draw_test_penguin(disp)
     init()
