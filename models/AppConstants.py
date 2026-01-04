@@ -12,3 +12,5 @@ class AppConstants:
     # see https://github.com/pimoroni/bme680-python/issues/11
     bme680_temperature_offset = -3.7
     tado_refresh_secs = 90
+    gkeep_refresh_secs = 180
+

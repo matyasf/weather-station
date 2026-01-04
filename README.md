@@ -16,8 +16,8 @@ Install dependencies `pip install -r requirements.txt`
 
 Run `python main.py`.
 
-On the first startup check the console to set up access to your TADO API.
-ß
+(if you enable TADO integration) On the first startup check the console to set up access to your TADO API.
+
 #### Running on startup:
 
 You can set it to auto-run on startup e.g. cron:
@@ -42,7 +42,7 @@ You can test it locally on a Unix machine (maybe on OSX too) by following the in
 
 Weather forecast provided by [Climacell](https://www.climacell.co/) and [yr.no](https://www.yr.no), icons from [yr.no](http://nrkno.github.io/yr-weather-symbols/)
 
-yr.no stuff is under [CC 4.0 BY and MIT license](https://api.met.no/doc/License)
+yr.no icons is under [CC 4.0 BY and MIT license](https://api.met.no/doc/License)
 
 #### License
 

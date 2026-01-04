@@ -8,10 +8,7 @@ from types import SimpleNamespace
 from asyncio import Future
 from typing import List
 from datetime import datetime, timedelta
-try:
-    from zoneinfo import ZoneInfo # TODO test for Pyton 3.9
-except ImportError: # for Python < 3.9
-    from backports.zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 from PIL import ImageFont, ImageDraw, Image
 from IT8951.display import AutoDisplay
 from controllers.SunriseSunsetCalculator import SunriseSunsetCalculator

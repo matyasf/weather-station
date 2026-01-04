@@ -12,14 +12,14 @@ from PIL.ImageFont import FreeTypeFont
 from Utils import Utils
 from controllers.BME680Controller import BME680Controller
 from controllers.ClimacellController import ClimacellController
-from controllers.YrController import YrController
-from controllers.TadoController import TadoController
+#from controllers.YrController import YrController
+#from controllers.TadoController import TadoController
 from IT8951 import constants
 from models.AppConstants import AppConstants
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description='Test EPD functionality')
+    p = argparse.ArgumentParser(description='Set EPD functionality')
     p.add_argument('-v', '--virtual', action='store_true',
                    help='display using a Tkinter window instead of the '
                         'actual e-paper device (for testing without a '
@@ -46,11 +46,11 @@ def init_display(args) -> AutoDisplay:
 
 
 def refresh_time_text(display_ref: AutoDisplay, time_font: FreeTypeFont) -> None:
+    y_pos = 0
     image_draw = ImageDraw.Draw(display_ref.frame_buf)
-    image_draw.rectangle((5, 5, 780, 250), fill=255)
+    image_draw.rectangle((5, y_pos + 5, 780, 250 + y_pos), fill=255) # black rectangle
     now = datetime.now()
-    image_draw.text((5, -40), text=now.strftime("%H:%M"), font=time_font)
-
+    image_draw.text((5, y_pos-40), text=now.strftime("%H:%M"), font=time_font)
 
 def draw_test_penguin(display_ref: AutoDisplay) -> None:
     #im2 = Image.new('L', (650, 500), 0xFF) # frame_buf
@@ -68,7 +68,7 @@ def draw_test_penguin(display_ref: AutoDisplay) -> None:
 def init() -> None:
     args = parse_args()
 
-    #climacell = ClimacellController()
+    climacell = ClimacellController()
     #tado = TadoController()
     #yr_no = YrController()
     bme680 = BME680Controller()
@@ -77,18 +77,18 @@ def init() -> None:
     Utils.log("starting app")
     time_font = ImageFont.truetype("assets/IBMPlexSans-Medium.ttf", 280)
     last_weather_refresh_time = datetime.fromisoformat("2000-01-01")
+    #last_tado_refresh_time = datetime.fromisoformat("2000-01-01")
     last_bme_refresh_time = datetime.fromisoformat("2000-01-01")
-    last_tado_refresh_time = datetime.fromisoformat("2000-01-01")
     last_full_refresh_time = datetime.now()
     while True:
         now_time = datetime.now()
         refresh_time_text(display, time_font)
         if (last_weather_refresh_time + timedelta(seconds=AppConstants.weather_api_refresh_secs)) < now_time:
             last_weather_refresh_time = now_time
-            #climacell.fetch_weather() ## better, use this!
+            climacell.fetch_weather()
             #yr_no.fetch_weather()
-        if (last_tado_refresh_time + timedelta(seconds=AppConstants.tado_refresh_secs)) < now_time:
-            last_tado_refresh_time = now_time
+        #if (last_tado_refresh_time + timedelta(seconds=AppConstants.tado_refresh_secs)) < now_time:
+            #last_tado_refresh_time = now_time
             #tado.fetch_heating_data()
         if (last_bme_refresh_time + timedelta(seconds=AppConstants.bme680_refresh_secs)) < now_time:
             last_bme_refresh_time = now_time
@@ -97,7 +97,7 @@ def init() -> None:
             # do a full refresh sometimes, this removes small ghosting artifacts
             last_full_refresh_time = now_time
             display.draw_full(constants.DisplayModes.GC16)
-        #climacell.display_data_if_any(display)
+        climacell.display_data_if_any(display)
         #yr_no.display_data_if_any(display)
         #tado.display_data_if_any(display)
         display.draw_partial(constants.DisplayModes.GL16)
