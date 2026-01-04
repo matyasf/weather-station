@@ -2,7 +2,8 @@
 
 import argparse
 import sys
-from time import sleep
+import socket
+import time
 from datetime import datetime, timedelta
 
 from PIL import ImageFont, ImageDraw, Image
@@ -65,6 +66,22 @@ def draw_test_penguin(display_ref: AutoDisplay) -> None:
     display_ref.draw_full(constants.DisplayModes.GC16)
     sleep(8)
 
+def wait_for_internet(timeout=15):
+    """Wait for internet connection with timeout."""
+    print(f"Waiting for internet (max {timeout}s)...")
+    end_time = time.time() + timeout
+    while time.time() < end_time:
+        try:
+            socket.create_connection(("8.8.8.8", 53), timeout=2)
+            print("✓ Internet connected!")
+            return
+        except OSError:
+            remaining = int(end_time - time.time())
+            if remaining > 0:
+                print(f"  Retrying... ({remaining}s remaining)")
+            time.sleep(1)
+    print("✗ Timeout: No internet connection")
+
 def init() -> None:
     args = parse_args()
 
@@ -80,6 +97,10 @@ def init() -> None:
     #last_tado_refresh_time = datetime.fromisoformat("2000-01-01")
     last_bme_refresh_time = datetime.fromisoformat("2000-01-01")
     last_full_refresh_time = datetime.now()
+
+    refresh_time_text(display, time_font) # display the time until the internet loads
+    display.draw_full(constants.DisplayModes.GC16)
+    wait_for_internet() # can take up to 10 secs
     while True:
         now_time = datetime.now()
         refresh_time_text(display, time_font)
@@ -93,7 +114,7 @@ def init() -> None:
         if (last_bme_refresh_time + timedelta(seconds=AppConstants.bme680_refresh_secs)) < now_time:
             last_bme_refresh_time = now_time
             bme680.display_sensor_data(display)
-        if (last_full_refresh_time + timedelta(seconds=60*30)) < now_time:
+        if (last_full_refresh_time + timedelta(seconds=60*20)) < now_time:
             # do a full refresh sometimes, this removes small ghosting artifacts
             last_full_refresh_time = now_time
             display.draw_full(constants.DisplayModes.GC16)
@@ -106,7 +127,7 @@ def init() -> None:
         if elapsed_time.total_seconds() < 2: # wait until 2 secods have elapsed before refresh
             sleep_duration = 2 - elapsed_time.total_seconds()
             #print(str(sleep_duration) + " secs slept")
-            sleep(sleep_duration)
+            time.sleep(sleep_duration)
         sys.stdout.flush()
 
 if __name__ == '__main__':
